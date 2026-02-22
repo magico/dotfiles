@@ -48,6 +48,18 @@ if ! ask_yes_no "Ready to begin?"; then
   exit 0
 fi
 
+# ── Request sudo upfront ─────────────────────────────────────
+echo ""
+info "Some steps require administrator access (sudo)."
+info "Enter your password now so the script can run unattended."
+echo ""
+sudo -v
+
+# Keep sudo alive in the background for the duration of the script
+while true; do sudo -n true; sleep 60; done 2>/dev/null &
+SUDO_KEEPALIVE_PID=$!
+trap 'kill "$SUDO_KEEPALIVE_PID" 2>/dev/null' EXIT
+
 # ── Count selected steps for progress display ────────────────
 selected_count=0
 for s in "${SELECTED_MODULES[@]}"; do
