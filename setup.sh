@@ -15,6 +15,7 @@ source "$DOTFILES_DIR/lib/utils.sh"
 MODULE_NAMES=(
   "Install Xcode Command Line Tools"
   "Install Homebrew"
+  "Install Oh My Zsh"
   "Install asdf + languages (Node.js, Python, Ruby)"
   "Configure Git identity + SSH"
   "Install Mac apps"
@@ -26,6 +27,7 @@ MODULE_NAMES=(
 MODULE_FILES=(
   "xcode.sh"
   "homebrew.sh"
+  "ohmyzsh.sh"
   "asdf.sh"
   "git.sh"
   "apps.sh"
