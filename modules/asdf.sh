@@ -30,6 +30,16 @@ run_module() {
     success "asdf already installed"
   fi
 
+  # ── Build dependencies ───────────────────────────────────
+  # Ruby compiles from source and needs these libraries
+  local deps=(openssl readline libyaml)
+  task "Installing build dependencies: ${deps[*]}"
+  brew install "${deps[@]}" 2>/dev/null
+  success "Build dependencies ready"
+
+  # Export flags so ruby-build can find Homebrew libs
+  export RUBY_CONFIGURE_OPTS="--with-openssl-dir=$(brew --prefix openssl) --with-libyaml-dir=$(brew --prefix libyaml) --with-readline-dir=$(brew --prefix readline)"
+
   # ── Languages ────────────────────────────────────────────
   local languages=(nodejs python ruby)
 
