@@ -33,6 +33,25 @@ run_module() {
     info "Run this step again after installing iTerm2"
   fi
 
+  # ── Spaceship prompt ──────────────────────────────────
+  task "Installing spaceship-prompt..."
+
+  if brew list spaceship &>/dev/null 2>&1; then
+    success "spaceship-prompt already installed"
+  else
+    brew install spaceship
+    success "spaceship-prompt installed"
+  fi
+
+  # Activate spaceship in .zshrc
+  local zshrc="$HOME/.zshrc"
+  if ! grep -q 'spaceship.zsh' "$zshrc" 2>/dev/null; then
+    echo '' >> "$zshrc"
+    echo '# Spaceship prompt' >> "$zshrc"
+    echo 'source "$(brew --prefix spaceship)/spaceship.zsh"' >> "$zshrc"
+    info "Added spaceship-prompt to $zshrc"
+  fi
+
   # ── VS Code Dracula theme ──────────────────────────────
   task "Installing Dracula theme for VS Code..."
 

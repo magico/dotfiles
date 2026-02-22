@@ -74,10 +74,20 @@ run_module() {
   # Add asdf shims to PATH for this session
   export PATH="$HOME/.asdf/shims:$PATH"
 
+  # ── Claude Code ──────────────────────────────────────
+  task "Installing Claude Code..."
+  if command -v claude &>/dev/null; then
+    success "Claude Code already installed"
+  else
+    curl -fsSL https://claude.ai/install.sh | bash
+    success "Claude Code installed"
+  fi
+
   # ── Verify ─────────────────────────────────────────────
   echo ""
   info "Versions now available:"
   info "  Node.js: $(node --version 2>/dev/null || echo 'not found')"
   info "  Python:  $(python3 --version 2>/dev/null || echo 'not found')"
   info "  Ruby:    $(ruby --version 2>/dev/null || echo 'not found')"
+  info "  Claude:  $(claude --version 2>/dev/null || echo 'not found')"
 }

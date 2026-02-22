@@ -7,7 +7,7 @@
 
 # Homebrew Cask apps (GUI apps)
 CASK_APPS=(
-  steer-mouse
+  steermouse
   iterm2
   claude
   visual-studio-code
