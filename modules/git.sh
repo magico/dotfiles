@@ -77,30 +77,34 @@ EOF
 
   ssh-add --apple-use-keychain "$ssh_key" 2>/dev/null || ssh-add "$ssh_key" 2>/dev/null
 
-  # ── Add key to GitHub via gh CLI ────────────────────────
-  if command -v gh &>/dev/null; then
-    task "Adding SSH key to GitHub..."
-
-    # Check if gh is authenticated
-    if gh auth status &>/dev/null 2>&1; then
-      local key_title="Mac Setup $(hostname -s) $(date +%Y-%m-%d)"
-      if gh ssh-key list 2>/dev/null | grep -q "$(cat "${ssh_key}.pub" | awk '{print $2}')"; then
-        success "SSH key already registered on GitHub"
-      else
-        gh ssh-key add "${ssh_key}.pub" --title "$key_title"
-        success "SSH key added to GitHub: $key_title"
-      fi
-    else
-      warn "GitHub CLI not authenticated — run 'gh auth login' first"
-      info "Then add your key manually: gh ssh-key add ~/.ssh/id_ed25519.pub"
-    fi
+  # ── Install GitHub CLI ──────────────────────────────────
+  if ! command -v gh &>/dev/null; then
+    task "Installing GitHub CLI..."
+    brew install gh
+    success "GitHub CLI installed"
   else
+    success "GitHub CLI already installed"
+  fi
+
+  # ── Authenticate with GitHub ───────────────────────────
+  if ! gh auth status &>/dev/null 2>&1; then
+    task "Authenticating with GitHub..."
+    info "A browser window will open — sign in to GitHub and authorize the CLI."
     echo ""
-    info "To add this key to GitHub, copy it:"
-    echo ""
-    echo -e "  ${DIM}$(cat "${ssh_key}.pub")${RESET}"
-    echo ""
-    info "Then go to: https://github.com/settings/ssh/new"
+    gh auth login --git-protocol ssh --web
+    success "GitHub CLI authenticated"
+  else
+    success "GitHub CLI already authenticated"
+  fi
+
+  # ── Upload SSH key to GitHub ───────────────────────────
+  task "Adding SSH key to GitHub..."
+  local key_title="Mac Setup $(hostname -s) $(date +%Y-%m-%d)"
+  if gh ssh-key list 2>/dev/null | grep -q "$(cat "${ssh_key}.pub" | awk '{print $2}')"; then
+    success "SSH key already registered on GitHub"
+  else
+    gh ssh-key add "${ssh_key}.pub" --title "$key_title"
+    success "SSH key added to GitHub: $key_title"
   fi
 
   # ── Configure Git to use SSH for GitHub ─────────────────
