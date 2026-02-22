@@ -76,6 +76,17 @@ run_module() {
 
   # ── Claude Code ──────────────────────────────────────
   task "Installing Claude Code..."
+
+  # Ensure ~/.local/bin is in PATH (native installer location)
+  export PATH="$HOME/.local/bin:$PATH"
+  local zshrc="$HOME/.zshrc"
+  if ! grep -q '\.local/bin' "$zshrc" 2>/dev/null; then
+    echo '' >> "$zshrc"
+    echo '# Claude Code' >> "$zshrc"
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$zshrc"
+    info "Added ~/.local/bin to PATH in $zshrc"
+  fi
+
   if command -v claude &>/dev/null; then
     success "Claude Code already installed"
   else

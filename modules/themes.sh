@@ -45,11 +45,18 @@ run_module() {
 
   # Activate spaceship in .zshrc
   local zshrc="$HOME/.zshrc"
+  local spaceship_path
+  spaceship_path="$(brew --prefix spaceship)/spaceship.zsh"
   if ! grep -q 'spaceship.zsh' "$zshrc" 2>/dev/null; then
     echo '' >> "$zshrc"
     echo '# Spaceship prompt' >> "$zshrc"
-    echo 'source "$(brew --prefix spaceship)/spaceship.zsh"' >> "$zshrc"
+    echo "source \"${spaceship_path}\"" >> "$zshrc"
     info "Added spaceship-prompt to $zshrc"
+  fi
+
+  # Source it in the current shell too
+  if [[ -f "$spaceship_path" ]]; then
+    source "$spaceship_path"
   fi
 
   # ── VS Code Dracula theme ──────────────────────────────
