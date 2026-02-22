@@ -2,60 +2,55 @@
 # ─────────────────────────────────────────────────────────────
 # config/macos.sh — macOS system preferences
 #
-# Add your `defaults write` commands here.
 # These will be applied by modules/macos.sh
-#
-# Uncomment any you want, or add your own.
 # ─────────────────────────────────────────────────────────────
 
 apply_macos_settings() {
-  # ── Placeholder ──────────────────────────────────────────
-  # The user will provide their preferred settings.
-  # Below are common examples you can uncomment and customize.
-
-  : # no-op — remove this line once you add real settings
-
-  # ── Keyboard ───────────────────────────────────────────
-  # defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool false
-  # defaults write NSGlobalDomain KeyRepeat -int 2
-  # defaults write NSGlobalDomain InitialKeyRepeat -int 15
-
-  # ── Trackpad ───────────────────────────────────────────
-  # defaults write com.apple.AppleMultitouchTrackpad Clicking -bool true
-  # defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool true
-
-  # ── Finder ─────────────────────────────────────────────
-  # defaults write NSGlobalDomain AppleShowAllExtensions -bool true
-  # defaults write com.apple.finder AppleShowAllFiles -bool true
-  # defaults write com.apple.finder ShowPathbar -bool true
-  # defaults write com.apple.finder ShowStatusBar -bool true
-  # defaults write com.apple.finder _FXShowPosixPathInTitle -bool true
-  # defaults write com.apple.finder FXDefaultSearchScope -string "SCcf"
 
   # ── Dock ───────────────────────────────────────────────
-  # defaults write com.apple.dock autohide -bool true
-  # defaults write com.apple.dock autohide-delay -float 0
-  # defaults write com.apple.dock tilesize -int 48
-  # defaults write com.apple.dock show-recents -bool false
+  # Auto-hide the Dock
+  defaults write com.apple.dock autohide -bool true
 
-  # ── Screenshots ────────────────────────────────────────
-  # defaults write com.apple.screencapture location -string "$HOME/Desktop/Screenshots"
-  # defaults write com.apple.screencapture type -string "png"
-  # defaults write com.apple.screencapture disable-shadow -bool true
+  # ── Desktop & Widgets ──────────────────────────────────
+  # Disable widgets on desktop (macOS Sonoma+)
+  defaults write com.apple.WindowManager StandardHideWidgets -bool true
+  defaults write com.apple.WindowManager StageManagerHideWidgets -bool true
 
-  # ── Safari ─────────────────────────────────────────────
-  # defaults write com.apple.Safari ShowFullURLInSmartSearchField -bool true
-  # defaults write com.apple.Safari AutoOpenSafeDownloads -bool false
+  # ── Hot Corners ────────────────────────────────────────
+  # Values: 0=none, 2=Mission Control, 3=App Windows,
+  #         4=Desktop, 5=Screen Saver On, 6=Screen Saver Off,
+  #         10=Display Sleep, 11=Launchpad, 12=Notification Center,
+  #         13=Lock Screen, 14=Quick Note
 
-  # ── Misc ───────────────────────────────────────────────
-  # defaults write NSGlobalDomain NSAutomaticSpellingCorrectionEnabled -bool false
-  # defaults write NSGlobalDomain NSAutomaticCapitalizationEnabled -bool false
+  # Bottom left → Mission Control
+  defaults write com.apple.dock wvous-bl-corner -int 2
+  defaults write com.apple.dock wvous-bl-modifier -int 0
+
+  # Top right → Desktop
+  defaults write com.apple.dock wvous-tr-corner -int 4
+  defaults write com.apple.dock wvous-tr-modifier -int 0
+
+  # ── Finder ────────────────────────────────────────────
+  # Show all filename extensions
+  defaults write NSGlobalDomain AppleShowAllExtensions -bool true
+
+  # ── Safari ───────────────────────────────────────────
+  # Show features for Web Developers
+  defaults write com.apple.Safari IncludeDevelopMenu -bool true
+  defaults write com.apple.Safari WebKitDeveloperExtrasEnabledPreferenceKey -bool true
+  defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2DeveloperExtrasEnabled -bool true
+
+  # Show full website address in Smart Search field
+  defaults write com.apple.Safari ShowFullURLInSmartSearchField -bool true
+
+  # ── Scrolling ──────────────────────────────────────────
+  # Turn off natural scrolling
+  defaults write NSGlobalDomain com.apple.swipescrolldirection -bool false
 }
 
 # List of processes to restart after applying settings.
-# Add to this list if your settings affect other apps.
 MACOS_RESTART_PROCESSES=(
-  # "Finder"
-  # "Dock"
-  # "SystemUIServer"
+  "Dock"
+  "Finder"
+  "Safari"
 )
