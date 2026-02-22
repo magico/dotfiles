@@ -13,6 +13,8 @@ CASK_APPS=(
   visual-studio-code
   sublime-merge
   cleanshot
+  whatsapp
+  google-chrome
 )
 
 # Mac App Store apps — "Name:ID" format
