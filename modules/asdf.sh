@@ -52,8 +52,12 @@ run_module() {
       success "${lang} ${latest} installed"
     fi
 
-    # Set as global default
-    asdf global "$lang" "$latest"
+    # Set as global default (asdf 0.18+ uses "set", older uses "global")
+    if asdf set --help &>/dev/null 2>&1; then
+      asdf set --home "$lang" "$latest"
+    else
+      asdf global "$lang" "$latest"
+    fi
     info "${lang} global version set to ${latest}"
   done
 
