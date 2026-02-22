@@ -43,6 +43,20 @@ run_module() {
     esac
   done
 
+  # ── Add folders ────────────────────────────────────────
+  if [[ ${#DOCK_FOLDERS[@]} -gt 0 ]]; then
+    for folder_path in "${DOCK_FOLDERS[@]}"; do
+      local folder_name
+      folder_name=$(basename "$folder_path")
+      if [[ -d "$folder_path" ]]; then
+        dockutil --add "$folder_path" --view fan --display folder --sort name --no-restart
+        success "Added folder: ${folder_name}"
+      else
+        warn "Folder not found: ${folder_path} — skipping"
+      fi
+    done
+  fi
+
   # ── Apply ──────────────────────────────────────────────
   task "Restarting Dock..."
   killall Dock

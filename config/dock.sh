@@ -27,3 +27,8 @@ DOCK_ITEMS=(
   "/Applications/Sublime Merge.app"
   "/Applications/Google Chrome.app"
 )
+
+# Folders added to the right side of Dock (shown as stacks, next to Trash)
+DOCK_FOLDERS=(
+  "$HOME/Downloads"
+)
