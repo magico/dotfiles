@@ -20,6 +20,9 @@ MODULE_NAMES=(
   "Configure Git identity + SSH"
   "Install Mac apps"
   "Apply Dracula theme (iTerm2 + VS Code)"
+  "Load iTerm2 settings"
+  "Restore SteerMouse settings"
+  "Restore VS Code settings + extensions"
   "Configure Dock"
   "Apply macOS settings"
 )
@@ -32,6 +35,9 @@ MODULE_FILES=(
   "git.sh"
   "apps.sh"
   "themes.sh"
+  "iterm2.sh"
+  "steermouse.sh"
+  "vscode.sh"
   "dock.sh"
   "macos.sh"
 )
