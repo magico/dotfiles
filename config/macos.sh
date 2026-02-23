@@ -35,13 +35,15 @@ apply_macos_settings() {
   defaults write NSGlobalDomain AppleShowAllExtensions -bool true
 
   # ── Safari ───────────────────────────────────────────
+  # Safari prefs are sandboxed; writing requires Full Disk Access for the terminal.
+  local safari_plist=~/Library/Containers/com.apple.Safari/Data/Library/Preferences/com.apple.Safari
   # Show features for Web Developers
-  defaults write com.apple.Safari IncludeDevelopMenu -bool true
-  defaults write com.apple.Safari WebKitDeveloperExtrasEnabledPreferenceKey -bool true
-  defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2DeveloperExtrasEnabled -bool true
+  defaults write "$safari_plist" IncludeDevelopMenu -bool true 2>/dev/null
+  defaults write "$safari_plist" WebKitDeveloperExtrasEnabledPreferenceKey -bool true 2>/dev/null
+  defaults write "$safari_plist" com.apple.Safari.ContentPageGroupIdentifier.WebKit2DeveloperExtrasEnabled -bool true 2>/dev/null
 
   # Show full website address in Smart Search field
-  defaults write com.apple.Safari ShowFullURLInSmartSearchField -bool true
+  defaults write "$safari_plist" ShowFullURLInSmartSearchField -bool true 2>/dev/null
 
   # ── Scrolling ──────────────────────────────────────────
   # Turn off natural scrolling

@@ -93,51 +93,138 @@ ask_yes_no() {
   [[ "$answer" =~ ^[Yy] ]]
 }
 
-# Print a numbered list and let user toggle items on/off.
+# Interactive checkbox selector for module selection.
 # Usage: select_modules "label1" "label2" ...
 # Sets SELECTED_MODULES array (0-indexed, matching input order) to 1 or 0.
 select_modules() {
   local labels=("$@")
   local count=${#labels[@]}
+  local cursor=0
+  local selected=()
   SELECTED_MODULES=()
 
-  # Default: all selected
+  # All items start checked
   for ((i = 0; i < count; i++)); do
-    SELECTED_MODULES[$i]=1
+    selected[$i]=1
   done
 
-  echo -e "  ${BOLD}Select which steps to run:${RESET}"
-  echo ""
-  for ((i = 0; i < count; i++)); do
-    local num=$((i + 1))
-    echo -e "    ${BOLD_CYAN}${num}.${RESET} ${labels[$i]}"
-  done
-  echo ""
-  echo -e "  ${DIM}Enter step numbers to toggle off, separated by spaces.${RESET}"
-  echo -e "  ${DIM}Press Enter to run all.${RESET}"
-  echo ""
-  echo -ne "  ${BOLD_CYAN}?${RESET} Skip steps: "
-  read -r skip_input
-
-  if [[ -n "$skip_input" ]]; then
-    for num in $skip_input; do
-      local idx=$((num - 1))
-      if [[ $idx -ge 0 && $idx -lt $count ]]; then
-        SELECTED_MODULES[$idx]=0
+  # ── Draw the interactive menu ──────────────────────────────
+  # Layout: header, blank, N items, blank, submit, blank, hint = N+6 lines
+  local total_lines=$((count + 6))
+  _sm_draw() {
+    if [[ "${1:-}" == "redraw" ]]; then
+      printf '\033[%dA' "$total_lines"
+    fi
+    printf '\033[K'
+    echo -e "  ${BOLD}Select which steps to run:${RESET}"
+    printf '\033[K\n'
+    local idx mark
+    for ((idx = 0; idx < count; idx++)); do
+      if [[ "${selected[$idx]}" == "1" ]]; then
+        mark="[✓]"
+      else
+        mark="[ ]"
+      fi
+      printf '\033[K'
+      if [[ $idx -eq $cursor ]]; then
+        echo -e "  ${BOLD_CYAN}› ${mark} ${labels[$idx]}${RESET}"
+      elif [[ "${selected[$idx]}" == "1" ]]; then
+        echo -e "    ${mark} ${labels[$idx]}"
+      else
+        echo -e "    ${DIM}${mark} ${labels[$idx]}${RESET}"
       fi
     done
-  fi
+    printf '\033[K\n'
+    printf '\033[K'
+    if [[ $cursor -eq $count ]]; then
+      echo -e "  ${BOLD_CYAN}› ⏎ Submit${RESET}"
+    else
+      echo -e "    ${DIM}⏎ Submit${RESET}"
+    fi
+    printf '\033[K\n'
+    printf '\033[K'
+    echo -e "  ${DIM}↑/↓ navigate  ⏎ select  a all  n none${RESET}"
+  }
 
-  # Print summary
-  echo ""
+  # ── Terminal state ─────────────────────────────────────────
+  local old_stty
+  old_stty=$(stty -g </dev/tty)
+
+  _sm_cleanup() {
+    stty "$old_stty" </dev/tty 2>/dev/null
+    printf '\033[?25h'
+  }
+  trap '_sm_cleanup; exit 1' INT TERM
+
+  printf '\033[?25l'  # hide cursor
+  _sm_draw
+
+  # ── Input loop ─────────────────────────────────────────────
+  while true; do
+    local key="" seq1="" seq2=""
+    IFS= read -rsn1 key </dev/tty
+
+    # Arrow keys send escape sequences: \033[A (up), \033[B (down)
+    if [[ "$key" == $'\033' ]]; then
+      IFS= read -rsn1 -t 1 seq1 </dev/tty 2>/dev/null || true
+      IFS= read -rsn1 -t 1 seq2 </dev/tty 2>/dev/null || true
+      key+="${seq1}${seq2}"
+    fi
+
+    local total=$((count + 1))  # items + submit
+    case "$key" in
+      $'\033[A' | k)  cursor=$(( (cursor - 1 + total) % total )) ;;
+      $'\033[B' | j)  cursor=$(( (cursor + 1) % total )) ;;
+      '')  # Enter — toggle item or confirm on Submit
+        if [[ $cursor -eq $count ]]; then
+          break
+        else
+          if [[ "${selected[$cursor]}" == "1" ]]; then
+            selected[$cursor]=0
+          else
+            selected[$cursor]=1
+          fi
+        fi
+        ;;
+      a)
+        for ((i = 0; i < count; i++)); do selected[$i]=1; done
+        ;;
+      n)
+        for ((i = 0; i < count; i++)); do selected[$i]=0; done
+        ;;
+    esac
+
+    _sm_draw redraw
+  done
+
+  # ── Restore terminal & remove traps ───────────────────────
+  _sm_cleanup
+  trap - INT TERM
+
+  # ── Replace interactive menu with static summary ──────────
+  printf '\033[%dA' "$total_lines"
+  printf '\033[K'
+  echo -e "  ${BOLD}Select which steps to run:${RESET}"
+  printf '\033[K\n'
   for ((i = 0; i < count; i++)); do
-    if [[ "${SELECTED_MODULES[$i]}" == "1" ]]; then
+    printf '\033[K'
+    if [[ "${selected[$i]}" == "1" ]]; then
       echo -e "    ${BOLD_GREEN}✓${RESET} ${labels[$i]}"
     else
       echo -e "    ${DIM}○ ${labels[$i]}${RESET}"
     fi
   done
-  echo ""
+  printf '\033[K\n'
+  printf '\033[K\n'
+  printf '\033[K\n'
+  printf '\033[K\n'
+
+  # ── Populate result array ─────────────────────────────────
+  for ((i = 0; i < count; i++)); do
+    SELECTED_MODULES[$i]=${selected[$i]}
+  done
+
+  unset -f _sm_draw _sm_cleanup
 }
 
 # ── Progress ─────────────────────────────────────────────────
