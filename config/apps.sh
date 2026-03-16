@@ -9,12 +9,14 @@
 CASK_APPS=(
   steermouse
   iterm2
+  chatgpt
   claude
   visual-studio-code
   sublime-merge
   cleanshot
   whatsapp
   google-chrome
+  readdle-spark
 )
 
 # Mac App Store apps — "Name:ID" format
@@ -23,6 +25,5 @@ MAS_APPS=(
   "Keynote:409183694"
   "Pages:409201541"
   "Numbers:409203825"
-  "Reeder.:1529445840"
-  "Reeder 4:1529448980"
+  "Reeder Classic.:1529448980"
 )
