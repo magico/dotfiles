@@ -93,15 +93,18 @@ ask_yes_no() {
   [[ "$answer" =~ ^[Yy] ]]
 }
 
-# Interactive checkbox selector for module selection.
-# Usage: select_modules "label1" "label2" ...
-# Sets SELECTED_MODULES array (0-indexed, matching input order) to 1 or 0.
-select_modules() {
+# Interactive checkbox selector. All items start checked.
+# Usage: select_items "Title:" "label1" "label2" ...
+# Sets SELECTED_ITEMS array (0-indexed, matching label order) to 1 or 0.
+# (A global rather than a caller-named variable: macOS bash 3.2 has no namerefs.)
+select_items() {
+  local title="$1"
+  shift
   local labels=("$@")
   local count=${#labels[@]}
   local cursor=0
   local selected=()
-  SELECTED_MODULES=()
+  SELECTED_ITEMS=()
 
   # All items start checked
   for ((i = 0; i < count; i++)); do
@@ -116,7 +119,7 @@ select_modules() {
       printf '\033[%dA' "$total_lines"
     fi
     printf '\033[K'
-    echo -e "  ${BOLD}Select which steps to run:${RESET}"
+    echo -e "  ${BOLD}${title}${RESET}"
     printf '\033[K\n'
     local idx mark
     for ((idx = 0; idx < count; idx++)); do
@@ -204,7 +207,7 @@ select_modules() {
   # ── Replace interactive menu with static summary ──────────
   printf '\033[%dA' "$total_lines"
   printf '\033[K'
-  echo -e "  ${BOLD}Select which steps to run:${RESET}"
+  echo -e "  ${BOLD}${title}${RESET}"
   printf '\033[K\n'
   for ((i = 0; i < count; i++)); do
     printf '\033[K'
@@ -214,14 +217,13 @@ select_modules() {
       echo -e "    ${DIM}○ ${labels[$i]}${RESET}"
     fi
   done
+  # One blank line, then erase the old Submit/hint rows below it
   printf '\033[K\n'
-  printf '\033[K\n'
-  printf '\033[K\n'
-  printf '\033[K\n'
+  printf '\033[J'
 
   # ── Populate result array ─────────────────────────────────
   for ((i = 0; i < count; i++)); do
-    SELECTED_MODULES[$i]=${selected[$i]}
+    SELECTED_ITEMS[$i]=${selected[$i]}
   done
 
   unset -f _sm_draw _sm_cleanup

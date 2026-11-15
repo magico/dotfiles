@@ -50,7 +50,48 @@ echo -e "  ${BOLD}This script will set up your new Mac.${RESET}"
 echo ""
 
 # ── Interactive selection ────────────────────────────────────
-select_modules "${MODULE_NAMES[@]}"
+select_items "Select which steps to run:" "${MODULE_NAMES[@]}"
+SELECTED_MODULES=("${SELECTED_ITEMS[@]}")
+
+# ── App selection (only if the apps step is selected) ────────
+# Asked up front, with the steps, so the run itself needs no input.
+for i in "${!MODULE_FILES[@]}"; do
+  if [[ "${MODULE_FILES[$i]}" == "apps.sh" && "${SELECTED_MODULES[$i]}" == "1" ]]; then
+    source "$DOTFILES_DIR/config/apps.sh"
+    cask_count=${#CASK_APPS[@]}
+    mas_count=${#MAS_APPS[@]}
+
+    # Indexes 0..cask_count-1 are casks, the rest App Store apps.
+    # (Indexed loops: "${arr[@]}" on an empty array fails under set -u in bash 3.2.)
+    app_labels=()
+    for ((j = 0; j < cask_count; j++)); do
+      app_labels+=("${CASK_APPS[$j]%%:*}")
+    done
+    for ((j = 0; j < mas_count; j++)); do
+      app_labels+=("${MAS_APPS[$j]%%:*} (App Store)")
+    done
+
+    # Read by modules/apps.sh
+    APPS_PICKED=1
+    SELECTED_CASK_APPS=()
+    SELECTED_MAS_APPS=()
+
+    if [[ ${#app_labels[@]} -gt 0 ]]; then
+      select_items "Select which apps to install:" "${app_labels[@]}"
+
+      for ((j = 0; j < cask_count; j++)); do
+        if [[ "${SELECTED_ITEMS[$j]}" == "1" ]]; then
+          SELECTED_CASK_APPS+=("${CASK_APPS[$j]}")
+        fi
+      done
+      for ((j = 0; j < mas_count; j++)); do
+        if [[ "${SELECTED_ITEMS[$((cask_count + j))]}" == "1" ]]; then
+          SELECTED_MAS_APPS+=("${MAS_APPS[$j]}")
+        fi
+      done
+    fi
+  fi
+done
 
 if ! ask_yes_no "Ready to begin?"; then
   echo ""

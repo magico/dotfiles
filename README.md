@@ -19,7 +19,7 @@ Interactive, colorful setup script for a fresh Mac. Installs dev tools, apps, th
    ./setup.sh
    ```
 
-4. **Follow the prompts** — the script will ask which steps to run, then handle everything automatically.
+4. **Follow the prompts** — the script will ask which steps to run (and, if you picked the apps step, which apps to install), then handle everything automatically.
 
 ## What Gets Installed
 
@@ -28,7 +28,7 @@ Interactive, colorful setup script for a fresh Mac. Installs dev tools, apps, th
 | Xcode CLI Tools | Compilers, git, and other dev essentials |
 | Homebrew | macOS package manager |
 | asdf | Version manager for Node.js, Python, and Ruby (latest stable of each) |
-| Mac Apps | SteerMouse, iTerm2, Claude, VS Code, Sublime Merge, CleanShot X, Keynote, Pages, Numbers, Reeder, Reeder 4 |
+| Mac Apps | Pick from a checklist: SteerMouse, iTerm2, ChatGPT, Claude, VS Code, Sublime Merge, CleanShot X, WhatsApp, Chrome, Spark, Keynote, Pages, Numbers, Reeder Classic |
 | Dracula Theme | Applied to iTerm2 and VS Code |
 | Dock | Custom layout with your preferred app order |
 | macOS Settings | System preferences via `defaults write` |
@@ -39,7 +39,7 @@ The `config/` directory holds all your preferences. Edit these files and re-run 
 
 | File | What to edit |
 |------|--------------|
-| `config/apps.sh` | Add or remove apps (Homebrew Cask names and Mac App Store IDs) |
+| `config/apps.sh` | Add or remove apps offered in the checklist (`"Name:cask-token"` and `"Name:App Store ID"`) |
 | `config/dock.sh` | Change Dock app order, add spacers or folders |
 | `config/macos.sh` | Add `defaults write` commands for system preferences |
 
