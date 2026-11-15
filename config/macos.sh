@@ -35,15 +35,21 @@ apply_macos_settings() {
   defaults write NSGlobalDomain AppleShowAllExtensions -bool true
 
   # ── Safari ───────────────────────────────────────────
-  # Safari prefs are sandboxed; writing requires Full Disk Access for the terminal.
+  # Safari prefs are sandboxed; writing requires Full Disk Access for the
+  # terminal. Without it `defaults write` fails, so try one write first and
+  # skip the rest (rather than letting the failure abort the installer).
   local safari_plist=~/Library/Containers/com.apple.Safari/Data/Library/Preferences/com.apple.Safari
-  # Show features for Web Developers
-  defaults write "$safari_plist" IncludeDevelopMenu -bool true 2>/dev/null
-  defaults write "$safari_plist" WebKitDeveloperExtrasEnabledPreferenceKey -bool true 2>/dev/null
-  defaults write "$safari_plist" com.apple.Safari.ContentPageGroupIdentifier.WebKit2DeveloperExtrasEnabled -bool true 2>/dev/null
+  if defaults write "$safari_plist" IncludeDevelopMenu -bool true 2>/dev/null; then
+    # Show features for Web Developers
+    defaults write "$safari_plist" WebKitDeveloperExtrasEnabledPreferenceKey -bool true
+    defaults write "$safari_plist" com.apple.Safari.ContentPageGroupIdentifier.WebKit2DeveloperExtrasEnabled -bool true
 
-  # Show full website address in Smart Search field
-  defaults write "$safari_plist" ShowFullURLInSmartSearchField -bool true 2>/dev/null
+    # Show full website address in Smart Search field
+    defaults write "$safari_plist" ShowFullURLInSmartSearchField -bool true
+  else
+    warn "Skipped Safari settings — your terminal needs Full Disk Access to change them"
+    info "System Settings → Privacy & Security → Full Disk Access, then re-run this step"
+  fi
 
   # ── Scrolling ──────────────────────────────────────────
   # Turn off natural scrolling

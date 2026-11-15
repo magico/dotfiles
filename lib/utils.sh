@@ -289,7 +289,7 @@ print_summary() {
   echo -e "${BOLD_CYAN}  │${RESET}${BOLD}  ✦ Setup Complete!                           ${RESET}${BOLD_CYAN}│${RESET}"
   echo -e "${BOLD_CYAN}  └─────────────────────────────────────────────┘${RESET}"
   echo ""
-  echo -e "  ${DIM}All tools are available in this shell session.${RESET}"
-  echo -e "  ${DIM}Open a new terminal and everything will still work.${RESET}"
+  echo -e "  ${DIM}Open a new terminal window to start using everything${RESET}"
+  echo -e "  ${DIM}(this window's shell doesn't see the new PATH and prompt).${RESET}"
   echo ""
 }

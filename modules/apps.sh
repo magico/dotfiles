@@ -37,18 +37,23 @@ run_module() {
     echo ""
 
     task "Installing Mac App Store apps..."
+    # List once, quietly: on a fresh Mac Spotlight hasn't indexed /Applications
+    # yet and `mas list` prints a long warning on every call.
+    local installed_mas
+    installed_mas=$(mas list 2>/dev/null || true)
+
     for entry in "${MAS_APPS[@]}"; do
       local name="${entry%%:*}"
       local id="${entry##*:}"
 
-      if mas list | grep -q "^${id} "; then
+      if grep -E "^[[:space:]]*${id}[[:space:]]" <<< "$installed_mas" >/dev/null; then
         success "${name} already installed"
       else
         task "Installing ${name} (ID: ${id})..."
         if mas install "$id"; then
           success "${name} installed"
         else
-          warn "Failed to install ${name} — make sure you're signed into the App Store"
+          warn "Failed to install ${name} — check you're signed into the App Store and the ID is current (mas search \"${name}\")"
         fi
       fi
     done

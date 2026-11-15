@@ -5,7 +5,6 @@
 
 run_module() {
   local steermouse_config="$DOTFILES_DIR/config/steermouse"
-  local prefs_dir="$HOME/Library/Preferences"
 
   if [[ ! -d "$steermouse_config" ]]; then
     warn "SteerMouse config not found in $steermouse_config — skipping"
@@ -17,7 +16,9 @@ run_module() {
   for plist in "$steermouse_config"/*.plist; do
     local filename
     filename="$(basename "$plist")"
-    cp "$plist" "$prefs_dir/$filename"
+    # Import through cfprefsd: copying the file straight into
+    # ~/Library/Preferences can be overwritten by cached preferences.
+    defaults import "${filename%.plist}" "$plist"
     success "Restored $filename"
   done
 

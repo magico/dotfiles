@@ -53,11 +53,8 @@ run_module() {
     echo "source \"${spaceship_path}\"" >> "$zshrc"
     info "Added spaceship-prompt to $zshrc"
   fi
-
-  # Source it in the current shell too
-  if [[ -f "$spaceship_path" ]]; then
-    source "$spaceship_path"
-  fi
+  # Don't source spaceship.zsh here: it's a zsh script and this installer runs
+  # in bash. The prompt takes effect in new terminal windows.
 
   # ── VS Code Dracula theme ──────────────────────────────
   task "Installing Dracula theme for VS Code..."
@@ -79,16 +76,18 @@ run_module() {
       # Update existing settings — check if workbench.colorTheme is already set
       if grep -q '"workbench.colorTheme"' "$vscode_settings"; then
         # Replace existing theme setting
-        sed -i '' 's/"workbench.colorTheme"[[:space:]]*:[[:space:]]*"[^"]*"/"workbench.colorTheme": "Dracula"/' "$vscode_settings"
+        sed -i '' 's/"workbench.colorTheme"[[:space:]]*:[[:space:]]*"[^"]*"/"workbench.colorTheme": "Dracula Theme"/' "$vscode_settings"
       else
-        # Add theme setting (insert after opening brace)
-        sed -i '' 's/^{$/{\n  "workbench.colorTheme": "Dracula",/' "$vscode_settings"
+        # Add theme setting (insert after opening brace). macOS sed needs a
+        # backslash + real newline here; "\n" would insert a literal "n".
+        sed -i '' 's/^{$/{\
+  "workbench.colorTheme": "Dracula Theme",/' "$vscode_settings"
       fi
     else
       # Create new settings file
       cat > "$vscode_settings" << 'EOF'
 {
-  "workbench.colorTheme": "Dracula"
+  "workbench.colorTheme": "Dracula Theme"
 }
 EOF
     fi

@@ -22,10 +22,22 @@ run_module() {
 
   if [[ -n "$computer_name" ]]; then
     sudo scutil --set ComputerName "$computer_name"
-    sudo scutil --set HostName "$computer_name"
-    sudo scutil --set LocalHostName "$computer_name"
-    sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName -string "$computer_name"
     success "Computer name set to: $computer_name"
+
+    # Host names only allow letters, digits and hyphens (scutil rejects
+    # anything else), so "Magico's Mac Studio" becomes "Magicos-Mac-Studio",
+    # the same conversion macOS does itself.
+    local host_name
+    host_name=$(printf '%s' "$computer_name" | tr -s ' ' '-' | LC_ALL=C tr -cd 'A-Za-z0-9-' | sed 's/^-*//; s/-*$//')
+    if [[ -n "$host_name" ]]; then
+      sudo scutil --set HostName "$host_name"
+      sudo scutil --set LocalHostName "$host_name"
+      # NetBIOS names are limited to 15 characters
+      sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName -string "${host_name:0:15}"
+      success "Host name set to: $host_name"
+    else
+      warn "Couldn't derive a valid host name from \"$computer_name\" — host name unchanged"
+    fi
   else
     skip "Computer name (no value provided)"
   fi
