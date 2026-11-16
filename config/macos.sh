@@ -22,13 +22,19 @@ apply_macos_settings() {
   #         10=Display Sleep, 11=Launchpad, 12=Notification Center,
   #         13=Lock Screen, 14=Quick Note
 
-  # Bottom left → Mission Control
-  defaults write com.apple.dock wvous-bl-corner -int 2
+  # Bottom left → Desktop
+  defaults write com.apple.dock wvous-bl-corner -int 4
   defaults write com.apple.dock wvous-bl-modifier -int 0
 
-  # Top right → Desktop
-  defaults write com.apple.dock wvous-tr-corner -int 4
+  # Top right → Mission Control
+  defaults write com.apple.dock wvous-tr-corner -int 2
   defaults write com.apple.dock wvous-tr-modifier -int 0
+
+  # Top left and bottom right → nothing (set explicitly to clear any existing action)
+  defaults write com.apple.dock wvous-tl-corner -int 0
+  defaults write com.apple.dock wvous-tl-modifier -int 0
+  defaults write com.apple.dock wvous-br-corner -int 0
+  defaults write com.apple.dock wvous-br-modifier -int 0
 
   # ── Finder ────────────────────────────────────────────
   # Show all filename extensions
