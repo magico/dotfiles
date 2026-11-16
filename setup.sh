@@ -18,6 +18,7 @@ MODULE_NAMES=(
   "Install Oh My Zsh"
   "Install asdf + languages (Node.js, Python, Ruby)"
   "Configure Git identity + SSH"
+  "Clone GitHub repos into ~/Development"
   "Install Mac apps"
   "Apply Dracula theme (iTerm2 + VS Code)"
   "Load iTerm2 settings"
@@ -33,6 +34,7 @@ MODULE_FILES=(
   "ohmyzsh.sh"
   "asdf.sh"
   "git.sh"
+  "repos.sh"
   "apps.sh"
   "themes.sh"
   "iterm2.sh"
@@ -53,45 +55,76 @@ echo ""
 select_items "Select which steps to run:" "${MODULE_NAMES[@]}"
 SELECTED_MODULES=("${SELECTED_ITEMS[@]}")
 
-# ── App selection (only if the apps step is selected) ────────
-# Asked up front, with the steps, so the run itself needs no input.
-for i in "${!MODULE_FILES[@]}"; do
-  if [[ "${MODULE_FILES[$i]}" == "apps.sh" && "${SELECTED_MODULES[$i]}" == "1" ]]; then
-    source "$DOTFILES_DIR/config/apps.sh"
-    cask_count=${#CASK_APPS[@]}
-    mas_count=${#MAS_APPS[@]}
+# True if the step for the given module file (e.g. "apps.sh") is ticked
+step_selected() {
+  local i
+  for i in "${!MODULE_FILES[@]}"; do
+    if [[ "${MODULE_FILES[$i]}" == "$1" ]]; then
+      [[ "${SELECTED_MODULES[$i]}" == "1" ]]
+      return
+    fi
+  done
+  return 1
+}
 
-    # Indexes 0..cask_count-1 are casks, the rest App Store apps.
-    # (Indexed loops: "${arr[@]}" on an empty array fails under set -u in bash 3.2.)
-    app_labels=()
+# Per-step checklists below are asked up front, with the steps, so the run
+# itself needs no input. (Indexed loops throughout: "${arr[@]}" on an empty
+# array fails under set -u in bash 3.2.)
+
+# ── Repo selection (only if the repos step is selected) ──────
+if step_selected repos.sh; then
+  source "$DOTFILES_DIR/config/repos.sh"
+
+  # Read by modules/repos.sh
+  REPOS_PICKED=1
+  SELECTED_REPOS=()
+
+  if [[ ${#REPOS[@]} -gt 0 ]]; then
+    select_items "Select which repos to clone into ~/Development:" "${REPOS[@]}"
+
+    for ((j = 0; j < ${#REPOS[@]}; j++)); do
+      if [[ "${SELECTED_ITEMS[$j]}" == "1" ]]; then
+        SELECTED_REPOS+=("${REPOS[$j]}")
+      fi
+    done
+  fi
+fi
+
+# ── App selection (only if the apps step is selected) ────────
+if step_selected apps.sh; then
+  source "$DOTFILES_DIR/config/apps.sh"
+  cask_count=${#CASK_APPS[@]}
+  mas_count=${#MAS_APPS[@]}
+
+  # Indexes 0..cask_count-1 are casks, the rest App Store apps.
+  app_labels=()
+  for ((j = 0; j < cask_count; j++)); do
+    app_labels+=("${CASK_APPS[$j]%%:*}")
+  done
+  for ((j = 0; j < mas_count; j++)); do
+    app_labels+=("${MAS_APPS[$j]%%:*} (App Store)")
+  done
+
+  # Read by modules/apps.sh
+  APPS_PICKED=1
+  SELECTED_CASK_APPS=()
+  SELECTED_MAS_APPS=()
+
+  if [[ ${#app_labels[@]} -gt 0 ]]; then
+    select_items "Select which apps to install:" "${app_labels[@]}"
+
     for ((j = 0; j < cask_count; j++)); do
-      app_labels+=("${CASK_APPS[$j]%%:*}")
+      if [[ "${SELECTED_ITEMS[$j]}" == "1" ]]; then
+        SELECTED_CASK_APPS+=("${CASK_APPS[$j]}")
+      fi
     done
     for ((j = 0; j < mas_count; j++)); do
-      app_labels+=("${MAS_APPS[$j]%%:*} (App Store)")
+      if [[ "${SELECTED_ITEMS[$((cask_count + j))]}" == "1" ]]; then
+        SELECTED_MAS_APPS+=("${MAS_APPS[$j]}")
+      fi
     done
-
-    # Read by modules/apps.sh
-    APPS_PICKED=1
-    SELECTED_CASK_APPS=()
-    SELECTED_MAS_APPS=()
-
-    if [[ ${#app_labels[@]} -gt 0 ]]; then
-      select_items "Select which apps to install:" "${app_labels[@]}"
-
-      for ((j = 0; j < cask_count; j++)); do
-        if [[ "${SELECTED_ITEMS[$j]}" == "1" ]]; then
-          SELECTED_CASK_APPS+=("${CASK_APPS[$j]}")
-        fi
-      done
-      for ((j = 0; j < mas_count; j++)); do
-        if [[ "${SELECTED_ITEMS[$((cask_count + j))]}" == "1" ]]; then
-          SELECTED_MAS_APPS+=("${MAS_APPS[$j]}")
-        fi
-      done
-    fi
   fi
-done
+fi
 
 if ! ask_yes_no "Ready to begin?"; then
   echo ""
