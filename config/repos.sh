@@ -9,11 +9,11 @@
 # ─────────────────────────────────────────────────────────────
 
 REPOS=(
+  "magico/dotfiles"
   "magico/magicomartinez"
   "magico/willow"
   "magico/antelope"
   "magico/matchstack"
-  "magico/who-holds-the-mother"
   "railskit/railskit-website"
   "railskit/railskit-components"
 )
